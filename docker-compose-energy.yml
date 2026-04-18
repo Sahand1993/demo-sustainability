@@ -1,0 +1,37 @@
+version: '3.2'
+
+services:
+
+  scaphandre:
+    image: hubblo/scaphandre:latest
+    privileged: true
+    ports:
+      - "8080:8080"
+    command: prometheus
+    volumes:
+      - /sys/class/powercap:/sys/class/powercap
+      - /proc:/proc
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=secret
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
+networks:
+  scaphandre-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.33.0/24

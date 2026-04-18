@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.3.2
+    container_name: zookeeper
+    restart: unless-stopped
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: confluentinc/cp-kafka:7.3.2
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    restart: unless-stopped
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:29092,PLAINTEXT_HOST://0.0.0.0:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+
+      # ----------------------------
+      # High-throughput I/O tuning
+      # ----------------------------
+
+      # Allow larger fetches and messages
+      KAFKA_MESSAGE_MAX_BYTES: 5242880                # 5MB
+      KAFKA_REPLICA_FETCH_MAX_BYTES: 5242880          # 5MB
+      KAFKA_FETCH_MESSAGE_MAX_BYTES: 5242880          # 5MB
+
+      # Increase network throughput
+      KAFKA_SOCKET_SEND_BUFFER_BYTES: 1024000
+      KAFKA_SOCKET_RECEIVE_BUFFER_BYTES: 1024000
+      KAFKA_SOCKET_REQUEST_MAX_BYTES: 104857600       # 100MB
+
+      # ----------------------------
+      # Log segment + flush tuning
+      # ----------------------------
+
+      # Larger segment for fewer small writes
+      KAFKA_LOG_SEGMENT_BYTES: 1073741824   # 1GB segments
+
+      # Relax durability → higher throughput
+      # (Kafka still fsyncs on checkpoints)
+      KAFKA_FLUSH_MESSAGES: 200000          # force flush only every N messages
+      KAFKA_FLUSH_MS: 2000                  # or every 2 seconds
+
+      # ----------------------------
+      # Partitioning / concurrency
+      # ----------------------------
+      KAFKA_NUM_PARTITIONS: 3             # adjust to your consumer concurrency
+
+
+  kafdrop:
+    image: obsidiandynamics/kafdrop:latest
+    container_name: kafdrop
+    depends_on:
+      - kafka
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+    environment:
+      KAFKA_BROKERCONNECT: 'kafka:29092'
