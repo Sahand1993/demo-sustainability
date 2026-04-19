@@ -183,7 +183,7 @@ public class FlinkStreamProcessor {
         properties.setProperty("bootstrap.servers", bootstrapServers);
         System.out.println("Using Kafka bootstrap servers: " + bootstrapServers);
         properties.setProperty("group.id", "flink-iceberg-consumer-" + topic);
-        properties.setProperty("auto.offset.reset", "earliest")
+        properties.setProperty("auto.offset.reset", "earliest");
         // Create Kafka consumer
         FlinkKafkaConsumer<String> consumer = new FlinkKafkaConsumer<>(
             topic,

@@ -126,7 +126,7 @@ class TPCHAsyncKafkaProducer:
         idx = 0
 
         for data_file in data_files:
-            print(f"  Processing file: {data_file}")
+            #print(f"  Processing file: {data_file}")
 
             async with aiofiles.open(data_file, mode='r') as f:
                 async for line in f:

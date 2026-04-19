@@ -90,36 +90,37 @@ FLINK_JOB_ID=$(echo "$FLINK_OUTPUT" | grep -oE '[a-f0-9]{32}' | head -1)
 echo "Flink Job ID: $FLINK_JOB_ID"
 
 # 4. Run kafka producer to stream TPCH data
-echo "========================================="
-echo "2. Starting kafka producer..."
-PRODUCER_START=$(date -u +"%Y-%m-%dT%H:%M:%S+00:00")
-sleep 5
-echo "Producer start time: $PRODUCER_START after 15s sleep"
 
-uv run tpch_streamer_async.py -d $DATA_DIR
+while true; do
+  echo "========================================="
+  echo "2. Starting kafka producer..."
+  PRODUCER_START=$(date -u +"%Y-%m-%dT%H:%M:%S+00:00")
+  sleep 5
+  echo "Producer start time: $PRODUCER_START after 15s sleep"
 
-
-
-sleep 10
-
-PRODUCER_END=$(date -u +"%Y-%m-%dT%H:%M:%S+00:00")
-echo "Producer finished at: $PRODUCER_END after 15s sleep"
-echo "Waiting ${GRACE_PERIOD}s"
-sleep $GRACE_PERIOD
+  uv run tpch_streamer_async.py -d $DATA_DIR
 
 
-# 5. Collect metrics for each job
-echo "========================================="
-echo "5. Collecting metrics for each job..."
+  sleep 60
 
-# Record end time (after grace period)
-# Capture Kafka PID
-KAFKA_BROKER_PID=$(pgrep -f "kafka.Kafka" | head -1)
-echo "Kafka Broker PID: $KAFKA_BROKER_PID" # need to check if it is only one
+  PRODUCER_END=$(date -u +"%Y-%m-%dT%H:%M:%S+00:00")
+  echo "Producer finished at: $PRODUCER_END after 15s sleep"
+  echo "Waiting ${GRACE_PERIOD}s"
+  sleep $GRACE_PERIOD
+done
 
-echo "  Start: $PRODUCER_START"
-echo "  End:   $PRODUCER_END"
-echo "  Broker PID:   $KAFKA_BROKER_PID"
+## 5. Collect metrics for each job
+#echo "========================================="
+#echo "5. Collecting metrics for each job..."
+#
+## Record end time (after grace period)
+## Capture Kafka PID
+#KAFKA_BROKER_PID=$(pgrep -f "kafka.Kafka" | head -1)
+#echo "Kafka Broker PID: $KAFKA_BROKER_PID" # need to check if it is only one
+#
+#echo "  Start: $PRODUCER_START"
+#echo "  End:   $PRODUCER_END"
+#echo "  Broker PID:   $KAFKA_BROKER_PID"
 
 #python3 "$METRICS_SCRIPT" "$EXPERIMENT_NAME_COMPLETE" \
 #    --start "$PRODUCER_START" \
@@ -153,7 +154,7 @@ echo ""
 echo "Metrics: $METRICS_DIR"
 echo "========================================="
 
-sleep 100
+sleep 100000
 
 echo "========================================="
 echo "Stopping Flink job..."
