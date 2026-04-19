@@ -4,10 +4,11 @@ echo "Starting Kafka Architecture Pipeline..."
 
 set -e
 
-while getopts "k:c:s:m:d:h:n:f:j:" opt; do
+while getopts "k:c:t:d:h:n:f:j:" opt; do
   case $opt in
     k) KAFKA_HOME="$OPTARG" ;;
     c) KAFKA_CONFIG="$OPTARG" ;;
+    t) KAFKA_TOPIC="$OPTARG" ;;
     d) DATA_DIR="$OPTARG" ;;
     h) HOME_DIR="$OPTARG" ;;
     n) EXPERIMENT_NAME="$OPTARG" ;;
@@ -19,6 +20,7 @@ done
 
 echo "KAFKA_HOME: $KAFKA_HOME"
 echo "KAFKA_CONFIG: $KAFKA_CONFIG"
+echo "KAFKA_TOPIC: $KAFKA_TOPIC"
 echo "METRICS_SCRIPT: $METRICS_SCRIPT"
 echo "METRICS_DIR: $METRICS_DIR"
 echo "DATA_DIR: $DATA_DIR"
@@ -49,9 +51,15 @@ echo "Kafka Cluster ID: $KAFKA_CLUSTER_ID"
 $KAFKA_HOME/bin/kafka-storage.sh format -t $KAFKA_CLUSTER_ID -c $KAFKA_CONFIG
 $KAFKA_HOME/bin/kafka-server-start.sh -daemon $KAFKA_CONFIG
 
+sleep 20
+
+$KAFKA_HOME/bin/kafka-topics.sh --bootstrap-server localhost:9092 --create --topic lineitem --if-not-exists --partitions 1 --replication-factor 1
+echo "Kafka topics:"
+$KAFKA_HOME/bin/kafka-topics.sh --bootstrap-server localhost:9092 --list
+
 # Verify Kafka is running
-echo "Checking Kafka cluster..."
-curl -s http://localhost:9092 || echo "WARNING: Kafka not accessible"
+#echo "Checking Kafka cluster..."
+#curl -s http://localhost:9092 || echo "WARNING: Kafka not accessible"
 
 echo "========================================="
 echo "2. Starting Flink cluster..."
@@ -73,11 +81,9 @@ sleep 10
 echo "========================================="
 echo "3. Submitting Flink job..."
 
-FLINK_OUTPUT=$($FLINK_HOME/bin/flink run -d "$FLINK_JOB" \
-  "$FLINK_TOPIC" \
-  "localhost:9092" 2>&1)
-
-echo "$FLINK_OUTPUT"
+$FLINK_HOME/bin/flink run -d "$FLINK_JOB" \
+  "$KAFKA_TOPIC" \
+  "localhost:9092"
 
 FLINK_JOB_ID=$(echo "$FLINK_OUTPUT" | grep -oE '[a-f0-9]{32}' | head -1)
 

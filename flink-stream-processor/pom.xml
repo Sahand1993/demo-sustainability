@@ -22,7 +22,7 @@
             <artifactId>flink-streaming-java</artifactId>
             <version>${flink.version}</version>
         </dependency>
-        
+
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-clients</artifactId>
@@ -49,7 +49,7 @@
             <artifactId>flink-json</artifactId>
             <version>${flink.version}</version>
         </dependency>
-        
+
         <!-- JUnit -->
         <dependency>
             <groupId>junit</groupId>
@@ -57,15 +57,14 @@
             <version>4.13.2</version>
             <scope>test</scope>
         </dependency>
-        
+
         <!-- Apache Iceberg - FIXED VERSION FOR FLINK 1.18 -->
         <dependency>
             <groupId>org.apache.iceberg</groupId>
             <artifactId>iceberg-flink-runtime-1.18</artifactId>  <!-- Changed from 1.20 -->
             <version>1.7.0</version>  <!-- Was 1.10.0, then 1.5.2, then 1.6.0 -->
-            <scope>provided</scope>
-        </dependency> 
-        
+        </dependency>
+
         <!-- HADOOP (needed for Iceberg Hadoop catalog) -->
         <dependency>
             <groupId>org.apache.hadoop</groupId>
@@ -82,7 +81,31 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        
+
+        <dependency>
+            <groupId>com.fasterxml.woodstox</groupId>
+            <artifactId>woodstox-core</artifactId>
+            <version>6.4.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.codehaus.woodstox</groupId>
+            <artifactId>stax2-api</artifactId>
+            <version>4.2.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-configuration2</artifactId>
+            <version>2.8.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+            <version>1.2</version>
+        </dependency>
+
         <dependency>
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-hdfs-client</artifactId>
@@ -93,8 +116,14 @@
                     <artifactId>log4j</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>        
-        
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-client</artifactId>
+            <version>3.3.4</version>
+        </dependency>
+
         <!-- Apache Iceberg Table API -->
         <dependency>
             <groupId>org.apache.flink</groupId>
@@ -108,7 +137,7 @@
             <artifactId>flink-table-planner_2.12</artifactId>
             <version>1.18.1</version>
             <scope>provided</scope>
-        </dependency>        
+        </dependency>
     </dependencies>
 
     <build>
@@ -130,12 +159,14 @@
                                     <exclude>io.dropwizard.metrics:*</exclude>
                                     <exclude>org.apache.flink:flink-metrics-dropwizard</exclude>
                                 </excludes>
-                            </artifactSet>                        
+                            </artifactSet>
                             <transformers>
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <mainClass>com.tum.energy.FlinkStreamProcessor</mainClass>
                                 </transformer>
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                             </transformers>
                             <filters>
                                 <filter>

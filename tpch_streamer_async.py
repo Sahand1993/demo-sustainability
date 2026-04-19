@@ -117,7 +117,6 @@ class TPCHAsyncKafkaProducer:
             raise FileNotFoundError(f"No data files found for {table_name} in {self.data_path}")
 
         print(f"Found {len(data_files)} files for table {table_name}:")
-        print(data_files)
 
         print(f"Streaming table: {table_name}")
         print(f"  Schema: {column_names}")

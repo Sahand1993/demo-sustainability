@@ -26,9 +26,9 @@ import static org.apache.flink.table.api.Expressions.$;
 public class FlinkStreamProcessor {
     
     // Configuration
-    private static final String SCHEMA_PATH = System.getProperty("user.home") + "/green-lakehouse/lien/experiments/experiment_8/schemas";
-    private static final String WAREHOUSE_PATH = System.getProperty("user.home") + "/green-lakehouse/lien/experiments/experiment_8/iceberg-warehouse/";
-    private static final String CHECKPOINT_PATH = System.getProperty("user.home") + "/green-lakehouse/lien/experiments/experiment_8/checkpoints/flink/";
+    private static final String SCHEMA_PATH = System.getProperty("user.home") + "/demo-video/schemas";
+    private static final String WAREHOUSE_PATH = System.getProperty("user.home") + "/demo-video/iceberg-warehouse/";
+    private static final String CHECKPOINT_PATH = System.getProperty("user.home") + "/demo-video/checkpoints/flink/";
     private static final String ICEBERG_NAMESPACE = "tpch_kafka";
     
     /**
@@ -144,7 +144,7 @@ public class FlinkStreamProcessor {
         
         // Enable checkpointing (important for Iceberg exactly-once semantics)
         // Checkpoint interval is configured via flink-conf.yaml: execution.checkpointing.interval
-        // env.enableCheckpointing(5000); // Default 5 seconds, comment or it will override flink-conf.yaml
+        env.enableCheckpointing(5000); // Default 5 seconds, comment or it will override flink-conf.yaml
         env.getCheckpointConfig().setCheckpointStorage("file://" + CHECKPOINT_PATH + topic);
         
         // Create Table environment for Iceberg (Flink 1.18 style)
@@ -183,7 +183,7 @@ public class FlinkStreamProcessor {
         properties.setProperty("bootstrap.servers", bootstrapServers);
         System.out.println("Using Kafka bootstrap servers: " + bootstrapServers);
         properties.setProperty("group.id", "flink-iceberg-consumer-" + topic);
-        
+        properties.setProperty("auto.offset.reset", "earliest")
         // Create Kafka consumer
         FlinkKafkaConsumer<String> consumer = new FlinkKafkaConsumer<>(
             topic,
@@ -211,9 +211,9 @@ public class FlinkStreamProcessor {
         TableResult result = tableEnv.executeSql(insertSQL);
         
         System.out.println("Streaming query started. Writing to Iceberg table: " + ICEBERG_NAMESPACE + "." + topic);
-        System.out.println("Press Ctrl+C to stop...");
+//        System.out.println("Press Ctrl+C to stop...");
         
         // CRITICAL: Wait for the streaming job (blocks until cancelled/failed)
-        result.await();
+//        result.await();
     }
 }

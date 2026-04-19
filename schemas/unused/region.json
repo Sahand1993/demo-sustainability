@@ -1,0 +1,4 @@
+{
+  "table": "region",
+  "columns": ["r_regionkey", "r_name", "r_comment"]
+}
